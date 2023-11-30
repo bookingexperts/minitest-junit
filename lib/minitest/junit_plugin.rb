@@ -18,7 +18,26 @@ module Minitest
   def self.plugin_junit_init(options)
     return unless options.delete :junit
     file_klass = options.delete(:file_klass) || File
-    io = file_klass.new options.delete(:junit_filename) || 'report.xml', 'w'
+    filename = options.delete(:junit_filename) || 'report.xml'
+
+    # Use separate files when running tests in parallel
+    if (test_env_number = ENV.fetch('TEST_ENV_NUMBER', nil))
+      test_env_number = test_env_number.presence || 1
+
+      filename =
+        # Turns /tmp/report.xml into /tmp/report_2.xml if test_env_number is 2
+        if (extname = File.extname(filename))
+          dirname = File.dirname(filename)
+          basename = File.basename(filename, extname)
+
+          File.join(dirname, "#{basename}_#{test_env_number}.#{extname}")
+        # Turns /tmp/report into tmp/report_2 if test_env_number is 2
+        else
+          "#{filename}_#{test_env_number}"
+        end
+    end
+
+    io = file_klass.new filename, 'w'
     reporter << Junit::Reporter.new(io, options)
   end
 end
