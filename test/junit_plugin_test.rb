@@ -63,6 +63,32 @@ class PluginTest < Minitest::Test
     file_klass.verify
   end
 
+  def test_test_env_number_is_appended_to_default_filename_when_present
+    Minitest.stub(:plugin_junit_fetch_test_env_number, '2') do
+      file_klass = Minitest::Mock.new
+      options = { junit: true, file_klass: file_klass }
+      Minitest.reporter = []
+
+      file_klass.expect(:new, true, ['./report_2.xml', 'w'])
+      Minitest.plugin_junit_init(options)
+
+      file_klass.verify
+    end
+  end
+
+  def test_test_env_number_is_appended_to_custom_filename_when_present
+    Minitest.stub(:plugin_junit_fetch_test_env_number, '') do
+      file_klass = Minitest::Mock.new
+      options = { junit: true, file_klass: file_klass, junit_filename: 'report' }
+      Minitest.reporter = []
+
+      file_klass.expect(:new, true, ['./report_1', 'w'])
+      Minitest.plugin_junit_init(options)
+
+      file_klass.verify
+    end
+  end
+
   def test_custom_filename_is_specified_by_a_flag
     opts = OptionParser.new
     options = {}
