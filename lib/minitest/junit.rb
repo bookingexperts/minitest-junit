@@ -27,6 +27,10 @@ module Minitest
         @results << result
       end
 
+      def prerecord(*)
+        # NOOP
+      end
+
       def report
         doc = Ox::Document.new(version: '1.0', encoding: 'UTF-8')
         instruct = Ox::Instruct.new(:xml)
